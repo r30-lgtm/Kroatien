@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+  <title>Kroatien Packliste – mit manuellem Hinzufügen</title>
+  <meta name="theme-color" content="#2563eb">
+  <style>
+    :root{ --bg:#f7f7fb; --card:#fff; --text:#111; --muted:#6b7280; --accent:#2563eb; --border:#e5e7eb; }
+    *{ box-sizing:border-box; }
+    body{ font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; margin:0; background:var(--bg); color:var(--text); }
+    header{ position:sticky; top:0; background:#fff; padding:12px; border-bottom:1px solid var(--border); z-index:10; }
+    h1{ margin:0; font-size:1.35rem; }
+    .sub{ color:var(--muted); margin:4px 0 0; font-size:.95rem; }
+    main{ max-width:720px; margin:0 auto; padding:14px; }
+    section{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px; margin:12px 0; }
+    h2{ margin:0 0 6px; font-size:1.1rem; }
+    .pill{ display:inline-block; border:1px solid var(--border); padding:2px 8px; border-radius:999px; font-size:.8rem; color:var(--muted); margin-left:6px; }
+    ul{ list-style:none; padding:0; margin:0; }
+    li{ display:flex; align-items:center; gap:10px; padding:10px 6px; }
+    li + li{ border-top:1px dashed var(--border); }
+    input[type="checkbox"]{ width:20px; height:20px; accent-color:var(--accent); }
+    label{ flex:1; }
+    .actions{ margin:10px 0; display:flex; gap:8px; flex-wrap:wrap; }
+    button{ padding:8px 12px; border-radius:10px; border:1px solid var(--border); background:#fff; cursor:pointer; font-weight:600; }
+    button.primary{ background:var(--accent); color:#fff; border-color:var(--accent); }
+    .footer{ color:var(--muted); font-size:.85rem; text-align:center; margin:20px 0; }
+    .row{ display:flex; gap:8px; }
+    .row input[type="text"]{ flex:1; padding:10px; border:1px solid var(--border); border-radius:10px; }
+    .icon-btn{ width:36px; height:36px; display:grid; place-items:center; border-radius:10px; }
+    .danger{ border-color:#ef4444; color:#ef4444; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>📝 Kroatien Packliste</h1>
+  <p class="sub">Nur deine Artikel. Du kannst manuell Punkte hinzufügen oder löschen. Fortschritt wird offline gespeichert.</p>
+  <div class="actions">
+    <button id="export" class="primary">Exportieren</button>
+    <button id="import">Importieren</button>
+    <input type="file" id="fileInput" accept=".json" style="display:none">
+    <button id="reset">Alles zurücksetzen</button>
+  </div>
+</header>
+<main>
+  <section>
+    <h2>Artikel <span class="pill" id="progress">0/0</span></h2>
+    <div class="row" style="margin:8px 0 12px;">
+      <input type="text" id="newItem" placeholder="Neuen Artikel eingeben… (z. B. Wasserkanister)">
+      <button id="addItem" class="primary">Hinzufügen</button>
+    </div>
+    <ul id="list"></ul>
+    <div class="actions">
+      <button id="checkAll">Alle abhaken</button>
+      <button id="uncheckAll">Alle leeren</button>
+      <button id="clearDone" class="danger">Abgehakte löschen</button>
+    </div>
+  </section>
+  <p class="footer">Speicherung lokal im Browser (kein Internet nötig). Nutze Export/Import für Backups oder Gerätewechsel.</p>
+</main>
+
+<script>
+(function(){
+  const STORAGE_KEY = "kroatienNurMeineListe_v2";
+  const initialItems = [
+    "Müllbeutel","Mückenspray","Tee","Geschirrtuch / Küchenrolle","Basic Gewürze","Sonnenschutz","Nudeln","Klopapier","Thunfisch",
+    "Zwiebeln","Knoblauch","Reis","Riegel","Käse","Öl","Eier","Skyr","Joghurt","Müsli / Haferflocken","Pesto","Tomatenmark",
+    "Nüsse","Getränke (Fahrt)","Brotaufstrich","Wurst / Fleisch"
+  ];
+
+  // State shape: { items: [{text:string, done:boolean}], created:number }
+  function load(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw){
+        return { items: initialItems.map(t=>({text:t, done:false})), created: Date.now() };
+      }
+      const data = JSON.parse(raw);
+      if(!data.items) data.items = [];
+      return data;
+    }catch(e){ return { items: initialItems.map(t=>({text:t, done:false})), created: Date.now() }; }
+  }
+  let state = load();
+
+  const listEl = document.getElementById('list');
+  const progressEl = document.getElementById('progress');
+  const newInput = document.getElementById('newItem');
+  const addBtn = document.getElementById('addItem');
+
+  function save(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    updateProgress();
+  }
+
+  function updateProgress(){
+    const total = state.items.length;
+    const done = state.items.filter(it=>it.done).length;
+    progressEl.textContent = done + "/" + total;
+  }
+
+  function makeLi(it, idx){
+    const li = document.createElement('li');
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!it.done;
+    const label = document.createElement('label'); label.textContent = it.text;
+    const del = document.createElement('button'); del.className = 'icon-btn danger'; del.title = 'Löschen'; del.textContent = "✕";
+
+    cb.addEventListener('change', ()=>{ it.done = cb.checked; save(); });
+    del.addEventListener('click', ()=>{
+      if(confirm('Diesen Punkt löschen?')){
+        state.items.splice(idx,1);
+        render();
+        save();
+      }
+    });
+
+    li.appendChild(cb);
+    li.appendChild(label);
+    li.appendChild(del);
+    return li;
+  }
+
+  function render(){
+    listEl.innerHTML = '';
+    state.items.forEach((it, idx)=> listEl.appendChild(makeLi(it, idx)));
+    updateProgress();
+  }
+
+  addBtn.addEventListener('click', ()=>{
+    const txt = newInput.value.trim();
+    if(!txt) return;
+    state.items.push({text: txt, done:false});
+    newInput.value='';
+    render();
+    save();
+  });
+  newInput.addEventListener('keypress', (e)=>{
+    if(e.key === 'Enter'){ addBtn.click(); }
+  });
+
+  document.getElementById('checkAll').onclick = ()=>{
+    state.items.forEach(it=>it.done=true); render(); save();
+  };
+  document.getElementById('uncheckAll').onclick = ()=>{
+    state.items.forEach(it=>it.done=false); render(); save();
+  };
+  document.getElementById('clearDone').onclick = ()=>{
+    if(confirm('Alle abgehakten Punkte entfernen?')){
+      state.items = state.items.filter(it=>!it.done);
+      render(); save();
+    }
+  };
+
+  // Export / Import / Reset
+  document.getElementById('export').onclick = ()=>{
+    const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'meine-checkliste-backup.json'; a.click();
+    URL.revokeObjectURL(url);
+  };
+  const fi = document.getElementById('fileInput');
+  document.getElementById('import').onclick = ()=> fi.click();
+  fi.addEventListener('change', e=>{
+    const file = e.target.files[0]; if(!file) return;
+    const r = new FileReader();
+    r.onload = ()=>{
+      try{
+        const data = JSON.parse(r.result);
+        if(!Array.isArray(data.items)) throw new Error('Ungültiges Format');
+        state = { items: data.items.map(x=>({text:String(x.text||""), done:!!x.done})), created: data.created || Date.now() };
+        render(); save();
+        alert('Import erfolgreich ✅');
+      }catch(err){ alert('Konnte nicht importieren ❌'); }
+    };
+    r.readAsText(file);
+  });
+
+  document.getElementById('reset').onclick = ()=>{
+    if(!confirm('Wirklich alles zurücksetzen?')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    state = { items: initialItems.map(t=>({text:t, done:false})), created: Date.now() };
+    render(); save();
+  };
+
+  // First render
+  render();
+  save();
+})();
+</script>
+</body>
+</html>
