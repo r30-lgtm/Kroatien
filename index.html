@@ -3,188 +3,395 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-  <title>Kroatien Packliste – mit manuellem Hinzufügen</title>
-  <meta name="theme-color" content="#2563eb">
+  <title>Kroatien Packliste – schön & smart</title>
+  <meta name="theme-color" content="#0ea5e9">
   <style>
-    :root{ --bg:#f7f7fb; --card:#fff; --text:#111; --muted:#6b7280; --accent:#2563eb; --border:#e5e7eb; }
+    /* --- Design Tokens --- */
+    :root{
+      --bg: #0b1220;
+      --bg-soft: #0f172a;
+      --card: #111a2e;
+      --card-2: #0e1628;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --accent: #0ea5e9;
+      --accent-2: #38bdf8;
+      --danger: #ef4444;
+      --border: #1e293b;
+      --shadow: 0 10px 30px rgba(2, 8, 23, .6);
+      --radius: 16px;
+    }
+    @media (prefers-color-scheme: light){
+      :root{
+        --bg:#f6f8fb; --bg-soft:#eef2f8; --card:#ffffff; --card-2:#ffffff;
+        --text:#0f172a; --muted:#64748b; --accent:#0284c7; --accent-2:#38bdf8; --danger:#dc2626;
+        --border:#e2e8f0; --shadow:0 10px 24px rgba(2,8,23,.08);
+      }
+    }
+
     *{ box-sizing:border-box; }
-    body{ font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; margin:0; background:var(--bg); color:var(--text); }
-    header{ position:sticky; top:0; background:#fff; padding:12px; border-bottom:1px solid var(--border); z-index:10; }
-    h1{ margin:0; font-size:1.35rem; }
-    .sub{ color:var(--muted); margin:4px 0 0; font-size:.95rem; }
-    main{ max-width:720px; margin:0 auto; padding:14px; }
-    section{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px; margin:12px 0; }
-    h2{ margin:0 0 6px; font-size:1.1rem; }
-    .pill{ display:inline-block; border:1px solid var(--border); padding:2px 8px; border-radius:999px; font-size:.8rem; color:var(--muted); margin-left:6px; }
-    ul{ list-style:none; padding:0; margin:0; }
-    li{ display:flex; align-items:center; gap:10px; padding:10px 6px; }
-    li + li{ border-top:1px dashed var(--border); }
-    input[type="checkbox"]{ width:20px; height:20px; accent-color:var(--accent); }
-    label{ flex:1; }
-    .actions{ margin:10px 0; display:flex; gap:8px; flex-wrap:wrap; }
-    button{ padding:8px 12px; border-radius:10px; border:1px solid var(--border); background:#fff; cursor:pointer; font-weight:600; }
-    button.primary{ background:var(--accent); color:#fff; border-color:var(--accent); }
-    .footer{ color:var(--muted); font-size:.85rem; text-align:center; margin:20px 0; }
-    .row{ display:flex; gap:8px; }
-    .row input[type="text"]{ flex:1; padding:10px; border:1px solid var(--border); border-radius:10px; }
-    .icon-btn{ width:36px; height:36px; display:grid; place-items:center; border-radius:10px; }
-    .danger{ border-color:#ef4444; color:#ef4444; }
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(14,165,233,.18), transparent 50%),
+        radial-gradient(900px 500px at 90% 0%, rgba(56,189,248,.15), transparent 50%),
+        var(--bg);
+      color:var(--text);
+      line-height:1.45;
+    }
+
+    /* --- Header --- */
+    header{
+      position:sticky; top:0; z-index:20;
+      backdrop-filter: blur(8px) saturate(1.1);
+      background: linear-gradient(180deg, rgba(15,23,42,.7), rgba(15,23,42,.35), transparent);
+      border-bottom: 1px solid var(--border);
+    }
+    .wrap{max-width:920px; margin:0 auto; padding:16px;}
+    .topbar{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+    .brand{display:flex; gap:12px; align-items:center;}
+    .logo{
+      width:42px; height:42px; border-radius:14px;
+      background: radial-gradient(circle at 30% 30%, var(--accent-2), var(--accent));
+      box-shadow: var(--shadow);
+      display:grid; place-items:center; color:white; font-weight:900;
+      letter-spacing:.5px;
+    }
+    h1{margin:0; font-size:1.35rem;}
+    .sub{margin:0; color:var(--muted); font-size:.95rem;}
+
+    .actions{display:flex; gap:8px; flex-wrap:wrap;}
+    button{
+      appearance:none; cursor:pointer;
+      border:1px solid var(--border); background:linear-gradient(180deg, var(--card), var(--card-2));
+      color:var(--text); padding:10px 14px; border-radius:12px; font-weight:600; font-size:.95rem;
+      box-shadow: var(--shadow);
+      transition: transform .08s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+    }
+    button:hover{ transform: translateY(-1px); }
+    button:active{ transform: translateY(0); }
+    button.primary{ background: linear-gradient(180deg, var(--accent-2), var(--accent)); color:white; border-color: transparent;}
+    button.ghost{ background: transparent; }
+
+    /* --- Main Card --- */
+    main{max-width:920px; margin: 16px auto 40px; padding: 0 16px;}
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)), var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    /* --- Progress --- */
+    .progressbar{
+      width:100%; height: 10px; border-radius:999px; background: rgba(148,163,184,.25); overflow:hidden; margin: 8px 0 4px;
+      border:1px solid var(--border);
+    }
+    .progressbar > div{ height:100%; width:0%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .25s ease; }
+
+    .grid{ display:grid; grid-template-columns: 1.2fr .8fr; gap:16px; }
+    @media (max-width: 860px){ .grid{grid-template-columns:1fr;} }
+
+    /* --- List --- */
+    ul{ list-style:none; margin:0; padding:0; }
+    li{
+      display:flex; align-items:center; gap:12px;
+      padding:12px 10px; border-radius:12px;
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+      border:1px dashed var(--border);
+    }
+    li + li{ margin-top:10px; }
+
+    .checkbox{
+      --s: 22px;
+      width:var(--s); height:var(--s); border-radius:6px; display:grid; place-items:center;
+      border:1px solid var(--border); background: var(--bg-soft);
+      transition: all .2s ease;
+    }
+    input[type="checkbox"]{ appearance:none; display:none; }
+    .checkmark{
+      width:14px; height:14px; border-radius:3px; transform: scale(0); opacity:0;
+      background: linear-gradient(180deg, var(--accent-2), var(--accent)); transition: all .18s ease;
+    }
+    input[type="checkbox"]:checked + .checkbox .checkmark{ transform: scale(1); opacity:1; }
+
+    .item-label{ flex:1; font-size:1rem; }
+    .item-actions{ display:flex; gap:8px; }
+    .icon-btn{
+      width:36px; height:36px; display:grid; place-items:center; border-radius:10px;
+      border:1px solid var(--border); background:transparent; color:var(--muted);
+      transition: color .2s ease, border-color .2s ease, transform .08s ease;
+      cursor:pointer;
+    }
+    .icon-btn:hover{ color:var(--text); border-color: var(--accent); transform: translateY(-1px); }
+    .icon-btn.danger:hover{ border-color: var(--danger); color: var(--danger); }
+
+    /* --- Aside --- */
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)), var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      position: sticky; top: 86px;
+    }
+    .row{ display:flex; gap:10px; }
+    .row input[type="text"]{ flex:1; padding:12px; border:1px solid var(--border); border-radius:12px; background:var(--bg-soft); color:var(--text); }
+    .muted{ color:var(--muted); font-size:.92rem; }
+
+    .footer{ text-align:center; color:var(--muted); margin-top:18px; font-size:.9rem; }
+
+    /* --- Toast --- */
+    .toast{
+      position: fixed; inset: auto 16px 16px auto; z-index:50;
+      background: linear-gradient(180deg, rgba(14,165,233,.12), rgba(14,165,233,.06)), var(--card);
+      border:1px solid var(--border); color: var(--text); padding:10px 12px; border-radius:12px; box-shadow: var(--shadow);
+      opacity:0; transform: translateY(10px); transition: all .2s ease;
+    }
+    .toast.show{ opacity:1; transform: translateY(0); }
   </style>
 </head>
 <body>
-<header>
-  <h1>📝 Kroatien Packliste</h1>
-  <p class="sub">Nur deine Artikel. Du kannst manuell Punkte hinzufügen oder löschen. Fortschritt wird offline gespeichert.</p>
-  <div class="actions">
-    <button id="export" class="primary">Exportieren</button>
-    <button id="import">Importieren</button>
-    <input type="file" id="fileInput" accept=".json" style="display:none">
-    <button id="reset">Alles zurücksetzen</button>
-  </div>
-</header>
-<main>
-  <section>
-    <h2>Artikel <span class="pill" id="progress">0/0</span></h2>
-    <div class="row" style="margin:8px 0 12px;">
-      <input type="text" id="newItem" placeholder="Neuen Artikel eingeben… (z. B. Wasserkanister)">
-      <button id="addItem" class="primary">Hinzufügen</button>
+  <header>
+    <div class="wrap topbar">
+      <div class="brand">
+        <div class="logo">✓</div>
+        <div>
+          <h1>Kroatien Packliste</h1>
+          <p class="sub">Schön. Schnell. Offline speichernd. Mit eigenem Hinzufügen & Löschen.</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="export" class="primary">Exportieren</button>
+        <button id="import">Importieren</button>
+        <input type="file" id="fileInput" accept=".json" style="display:none">
+        <button id="reset" class="ghost">Zurücksetzen</button>
+      </div>
     </div>
-    <ul id="list"></ul>
-    <div class="actions">
-      <button id="checkAll">Alle abhaken</button>
-      <button id="uncheckAll">Alle leeren</button>
-      <button id="clearDone" class="danger">Abgehakte löschen</button>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="grid">
+        <section>
+          <div style="display:flex; align-items:end; justify-content:space-between; gap:10px;">
+            <div>
+              <h2 style="margin:0;">Artikel</h2>
+              <div class="progressbar" aria-label="Fortschritt"><div id="progressBar"></div></div>
+              <div class="muted"><span id="progressText">0/0</span> erledigt</div>
+            </div>
+            <div class="actions" style="margin:0;">
+              <button id="checkAll">Alle ✓</button>
+              <button id="uncheckAll">Alle leeren</button>
+              <button id="clearDone" class="danger">Abgehakte löschen</button>
+            </div>
+          </div>
+
+          <ul id="list" style="margin-top:12px;"></ul>
+        </section>
+
+        <aside class="panel">
+          <h3 style="margin:0 0 6px;">Neuen Artikel hinzufügen</h3>
+          <p class="muted">Eintragen & hinzufügen. Enter funktioniert ebenfalls.</p>
+          <div class="row" style="margin:8px 0 10px;">
+            <input type="text" id="newItem" placeholder="z. B. Wasserkanister">
+            <button id="addItem" class="primary">Hinzufügen</button>
+          </div>
+
+          <h3 style="margin:10px 0 6px;">Schnellsuche</h3>
+          <input type="text" id="search" placeholder="Liste durchsuchen …" />
+          <p class="muted" style="margin-top:8px;">Tipp: Du kannst Einträge löschen mit dem ✕-Button. Alles wird lokal gespeichert.</p>
+        </aside>
+      </div>
     </div>
-  </section>
-  <p class="footer">Speicherung lokal im Browser (kein Internet nötig). Nutze Export/Import für Backups oder Gerätewechsel.</p>
-</main>
 
-<script>
-(function(){
-  const STORAGE_KEY = "kroatienNurMeineListe_v2";
-  const initialItems = [
-    "Müllbeutel","Mückenspray","Tee","Geschirrtuch / Küchenrolle","Basic Gewürze","Sonnenschutz","Nudeln","Klopapier","Thunfisch",
-    "Zwiebeln","Knoblauch","Reis","Riegel","Käse","Öl","Eier","Skyr","Joghurt","Müsli / Haferflocken","Pesto","Tomatenmark",
-    "Nüsse","Getränke (Fahrt)","Brotaufstrich","Wurst / Fleisch"
-  ];
+    <p class="footer">Made for r30-lgtm • Funktioniert offline (localStorage). Keine externen Abhängigkeiten.</p>
+  </main>
 
-  // State shape: { items: [{text:string, done:boolean}], created:number }
-  function load(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(!raw){
-        return { items: initialItems.map(t=>({text:t, done:false})), created: Date.now() };
+  <div class="toast" id="toast">Gespeichert</div>
+
+  <script>
+    (function(){
+      const STORAGE_KEY = "kroatienNurMeineListe_v3";
+      const initialItems = [
+        "Müllbeutel","Mückenspray","Tee","Geschirrtuch / Küchenrolle","Basic Gewürze","Sonnenschutz","Nudeln","Klopapier","Thunfisch",
+        "Zwiebeln","Knoblauch","Reis","Riegel","Käse","Öl","Eier","Skyr","Joghurt","Müsli / Haferflocken","Pesto","Tomatenmark",
+        "Nüsse","Getränke (Fahrt)","Brotaufstrich","Wurst / Fleisch"
+      ];
+
+      function load(){
+        try{
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if(!raw) return { items: initialItems.map(t=>({text:t, done:false})), created: Date.now() };
+          const data = JSON.parse(raw);
+          if(!Array.isArray(data.items)) data.items = [];
+          return data;
+        }catch(e){ return { items: initialItems.map(t=>({text:t, done:false})), created: Date.now() }; }
       }
-      const data = JSON.parse(raw);
-      if(!data.items) data.items = [];
-      return data;
-    }catch(e){ return { items: initialItems.map(t=>({text:t, done:false})), created: Date.now() }; }
-  }
-  let state = load();
+      let state = load();
 
-  const listEl = document.getElementById('list');
-  const progressEl = document.getElementById('progress');
-  const newInput = document.getElementById('newItem');
-  const addBtn = document.getElementById('addItem');
+      const listEl = document.getElementById('list');
+      const newInput = document.getElementById('newItem');
+      const addBtn = document.getElementById('addItem');
+      const progressText = document.getElementById('progressText');
+      const progressBar = document.getElementById('progressBar');
+      const search = document.getElementById('search');
+      const toast = document.getElementById('toast');
 
-  function save(){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    updateProgress();
-  }
+      function showToast(msg){
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(()=> toast.classList.remove('show'), 1200);
+      }
 
-  function updateProgress(){
-    const total = state.items.length;
-    const done = state.items.filter(it=>it.done).length;
-    progressEl.textContent = done + "/" + total;
-  }
+      function save(){
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        updateProgress();
+      }
 
-  function makeLi(it, idx){
-    const li = document.createElement('li');
-    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!it.done;
-    const label = document.createElement('label'); label.textContent = it.text;
-    const del = document.createElement('button'); del.className = 'icon-btn danger'; del.title = 'Löschen'; del.textContent = "✕";
+      function updateProgress(){
+        const total = state.items.length;
+        const done = state.items.filter(it=>it.done).length;
+        progressText.textContent = done + "/" + total;
+        const pct = total ? Math.round(done/total*100) : 0;
+        progressBar.style.width = pct + "%";
+      }
 
-    cb.addEventListener('change', ()=>{ it.done = cb.checked; save(); });
-    del.addEventListener('click', ()=>{
-      if(confirm('Diesen Punkt löschen?')){
-        state.items.splice(idx,1);
+      function makeLi(it, idx){
+        const li = document.createElement('li');
+
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.checked = !!it.done;
+
+        const box = document.createElement('div');
+        box.className = 'checkbox';
+        const mark = document.createElement('div');
+        mark.className = 'checkmark';
+        box.appendChild(mark);
+
+        input.addEventListener('change', ()=>{
+          it.done = input.checked;
+          save();
+        });
+
+        const label = document.createElement('div');
+        label.className = 'item-label';
+        label.textContent = it.text;
+
+        const del = document.createElement('button');
+        del.className = 'icon-btn danger';
+        del.title = 'Löschen';
+        del.innerHTML = '✕';
+        del.addEventListener('click', ()=>{
+          if(confirm('Diesen Punkt löschen?')){
+            state.items.splice(idx,1);
+            render();
+            save();
+            showToast('Gelöscht');
+          }
+        });
+
+        const actions = document.createElement('div');
+        actions.className = 'item-actions';
+        actions.appendChild(del);
+
+        // Structure: [input(hidden)+checkbox][label][actions]
+        const leftWrap = document.createElement('div');
+        leftWrap.style.display = 'flex';
+        leftWrap.style.alignItems = 'center';
+        leftWrap.style.gap = '10px';
+        leftWrap.appendChild(input);
+        leftWrap.appendChild(box);
+
+        li.appendChild(leftWrap);
+        li.appendChild(label);
+        li.appendChild(actions);
+
+        // clicking on visual box toggles checkbox
+        box.addEventListener('click', ()=>{ input.checked = !input.checked; input.dispatchEvent(new Event('change')); });
+
+        return li;
+      }
+
+      function render(){
+        const q = (search.value || '').toLowerCase();
+        listEl.innerHTML = '';
+        state.items
+          .map((it, idx)=> ({it, idx}))
+          .filter(({it}) => it.text.toLowerCase().includes(q))
+          .forEach(({it, idx}) => listEl.appendChild(makeLi(it, idx)));
+        updateProgress();
+      }
+
+      // Add item
+      addBtn.addEventListener('click', ()=>{
+        const txt = (newInput.value || '').trim();
+        if(!txt) return;
+        state.items.unshift({text: txt, done:false});
+        newInput.value='';
         render();
         save();
-      }
-    });
+        showToast('Hinzugefügt');
+      });
+      newInput.addEventListener('keypress', (e)=>{
+        if(e.key === 'Enter'){ addBtn.click(); }
+      });
 
-    li.appendChild(cb);
-    li.appendChild(label);
-    li.appendChild(del);
-    return li;
-  }
+      // Bulk actions
+      document.getElementById('checkAll').onclick = ()=>{
+        state.items.forEach(it=>it.done=true); render(); save(); showToast('Alles abgehakt');
+      };
+      document.getElementById('uncheckAll').onclick = ()=>{
+        state.items.forEach(it=>it.done=false); render(); save(); showToast('Alles geleert');
+      };
+      document.getElementById('clearDone').onclick = ()=>{
+        if(confirm('Alle abgehakten Punkte entfernen?')){
+          state.items = state.items.filter(it=>!it.done);
+          render(); save(); showToast('Abgehakte entfernt');
+        }
+      };
 
-  function render(){
-    listEl.innerHTML = '';
-    state.items.forEach((it, idx)=> listEl.appendChild(makeLi(it, idx)));
-    updateProgress();
-  }
+      // Export / Import / Reset
+      document.getElementById('export').onclick = ()=>{
+        const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'meine-checkliste-backup.json'; a.click();
+        URL.revokeObjectURL(url);
+        showToast('Export erstellt');
+      };
+      const fi = document.getElementById('fileInput');
+      document.getElementById('import').onclick = ()=> fi.click();
+      fi.addEventListener('change', e=>{
+        const file = e.target.files[0]; if(!file) return;
+        const r = new FileReader();
+        r.onload = ()=>{
+          try{
+            const data = JSON.parse(r.result);
+            if(!Array.isArray(data.items)) throw new Error('Ungültiges Format');
+            state = { items: data.items.map(x=>({text:String(x.text||""), done:!!x.done})), created: data.created || Date.now() };
+            render(); save(); showToast('Import erfolgreich');
+          }catch(err){ alert('Konnte nicht importieren ❌'); }
+        };
+        r.readAsText(file);
+      });
 
-  addBtn.addEventListener('click', ()=>{
-    const txt = newInput.value.trim();
-    if(!txt) return;
-    state.items.push({text: txt, done:false});
-    newInput.value='';
-    render();
-    save();
-  });
-  newInput.addEventListener('keypress', (e)=>{
-    if(e.key === 'Enter'){ addBtn.click(); }
-  });
+      document.getElementById('reset').onclick = ()=>{
+        if(!confirm('Wirklich alles zurücksetzen?')) return;
+        localStorage.removeItem(STORAGE_KEY);
+        state = { items: initialItems.map(t=>({text:t, done:false})), created: Date.now() };
+        render(); save(); showToast('Zurückgesetzt');
+      };
 
-  document.getElementById('checkAll').onclick = ()=>{
-    state.items.forEach(it=>it.done=true); render(); save();
-  };
-  document.getElementById('uncheckAll').onclick = ()=>{
-    state.items.forEach(it=>it.done=false); render(); save();
-  };
-  document.getElementById('clearDone').onclick = ()=>{
-    if(confirm('Alle abgehakten Punkte entfernen?')){
-      state.items = state.items.filter(it=>!it.done);
-      render(); save();
-    }
-  };
+      search.addEventListener('input', render);
 
-  // Export / Import / Reset
-  document.getElementById('export').onclick = ()=>{
-    const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'meine-checkliste-backup.json'; a.click();
-    URL.revokeObjectURL(url);
-  };
-  const fi = document.getElementById('fileInput');
-  document.getElementById('import').onclick = ()=> fi.click();
-  fi.addEventListener('change', e=>{
-    const file = e.target.files[0]; if(!file) return;
-    const r = new FileReader();
-    r.onload = ()=>{
-      try{
-        const data = JSON.parse(r.result);
-        if(!Array.isArray(data.items)) throw new Error('Ungültiges Format');
-        state = { items: data.items.map(x=>({text:String(x.text||""), done:!!x.done})), created: data.created || Date.now() };
-        render(); save();
-        alert('Import erfolgreich ✅');
-      }catch(err){ alert('Konnte nicht importieren ❌'); }
-    };
-    r.readAsText(file);
-  });
-
-  document.getElementById('reset').onclick = ()=>{
-    if(!confirm('Wirklich alles zurücksetzen?')) return;
-    localStorage.removeItem(STORAGE_KEY);
-    state = { items: initialItems.map(t=>({text:t, done:false})), created: Date.now() };
-    render(); save();
-  };
-
-  // First render
-  render();
-  save();
-})();
-</script>
+      // First draw
+      render();
+      save();
+    })();
+  </script>
 </body>
 </html>
